@@ -1,119 +1,136 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import "./App.css";
 import { Line } from "react-chartjs-2";
 
 import Select from "./Select";
-
-const data = {
-  labels: [],
-  datasets: [
-    {
-      label: "Currency",
-      fill: true,
-      lineTension: 0.1,
-      backgroundColor: "rgba(75,192,192,0.4)",
-      borderColor: "rgba(75,192,192,1)",
-      borderCapStyle: "butt",
-      borderDashOffset: 0.0,
-      borderJoinStyle: "miter",
-      pointBorderColor: "rgba(75,192,192,1)",
-      pointBackgroundColor: "#fff",
-      pointBorderWidth: 5,
-      pointHoverRadius: 5,
-      pointHoverBackgroundColor: "rgba(75,192,192,1)",
-      pointHoverBorderColor: "rgba(220,220,220,1)",
-      pointHoverBorderWidth: 2,
-      pointRadius: 1,
-      pointHitRadius: 10
-    }
-  ]
-};
+import DateWiget from "./DateWiget";
+import data from "../dataForLine";
+import api from "../api";
+import currencyId from "../currencyId";
+import ButtonToggle from "./ButtonToggle";
+import TableCurrency from "./TableCurrency";
 
 class App extends Component {
   state = {
     rate: [],
-    endDate: new Date().toISOString().slice(0, 10),
-    startDate:
-      new Date().toISOString().slice(0, 8) +
-      String(
-        +new Date()
-          .toISOString()
-          .slice(0, 10)
-          .slice(-2) - 6
-      ),
-    currency: "291"
+    endDate: new Date(Date.now() + 3600 * 3 * 1000)
+      .toISOString()
+      .substring(0, 10),
+    startDate: new Date(new Date() - 6 * 86400 * 1000)
+      .toISOString()
+      .substring(0, 10),
+    currencyId: currencyId.USD,
+    isTable: false
   };
 
   UNSAFE_componentWillUpdate(nextProps, nextState) {
-    if (nextState.currency !== this.state.currency) {
-      this.api(nextState.currency);
-    }
-  }
-
-  componentDidMount() {
-    this.setDay();
-    this.api(this.state.currency);
-  }
-
-  api = currentCurrency => {
-    fetch(
-      `http://www.nbrb.by/API/ExRates/Rates/Dynamics/${currentCurrency}?startDate=${
-        this.state.startDate
-      }&endDate=${this.state.endDate}`
-    )
-      .then(currency => currency.json())
-      .then(res => {
+    const { currencyId, startDate, endDate } = this.state;
+    if (nextState.currencyId !== currencyId) {
+      api(nextState.currencyId, startDate, endDate).then(res => {
         this.setState({
           rate: res
         });
       });
-  };
-
-  setDay = () => {
-    let newDate = new Date();
-
-    for (let i = 0; i < 7; i++) {
-      let day = new Date(
-        newDate.getFullYear(),
-        newDate.getMonth(),
-        newDate.getDate() - 6 + i
-      ).toLocaleString("ru", { weekday: "long" });
-      data.labels.push(day);
+    } else if (nextState.startDate !== startDate) {
+      api(currencyId, nextState.startDate, endDate).then(res => {
+        this.setState({
+          rate: res
+        });
+      });
+    } else if (nextState.endDate !== endDate) {
+      api(currencyId, startDate, nextState.endDate).then(res => {
+        this.setState({
+          rate: res
+        });
+      });
     }
-  };
+  }
+
+  componentDidMount() {
+    const { currencyId, startDate, endDate } = this.state;
+    api(currencyId, startDate, endDate).then(res => {
+      this.setState({
+        rate: res
+      });
+    });
+  }
 
   changeCurrency = e => {
     let newCurrency;
     switch (e.target.value) {
       case "USD":
-        newCurrency = "291";
+        newCurrency = currencyId.USD;
         break;
       case "EUR":
-        newCurrency = "292";
+        newCurrency = currencyId.EUR;
         break;
       case "RUB":
-        newCurrency = "298";
+        newCurrency = currencyId.RUB;
         break;
       default:
         throw new Error("No such currency");
     }
     this.setState({
-      currency: newCurrency
+      currencyId: newCurrency
+    });
+  };
+
+  changeStartDate = e => {
+    this.setState({
+      startDate: this.wiget.startDate.state.value
+    });
+  };
+
+  changeEndDate = () => {
+    this.setState({
+      endDate: this.wiget.endDate.state.value
+    });
+  };
+
+  changeIsTable = () => {
+    this.setState(({ startDate, isTable, currencyId }) => {
+      return {
+        isTable: !isTable,
+        currencyId: !isTable ? currencyId : "145",
+        startDate: !isTable
+          ? startDate
+          : new Date(new Date() - 6 * 86400 * 1000)
+              .toISOString()
+              .substring(0, 10)
+      };
     });
   };
 
   render() {
+    const { startDate, endDate, isTable, currencyId, rate } = this.state;
+    console.log(currencyId);
+    data.labels = this.state.rate.map(item => item.Date.slice(0, 10));
+    data.datasets[0].data = this.state.rate.map(item => item.Cur_OfficialRate);
     return (
       <div className="App">
-        <Line
-          data={data}
-          rate={
-            (data.datasets[0].data = this.state.rate.map(
-              item => item.Cur_OfficialRate
-            ))
-          }
-        />
-        <Select onChange={this.changeCurrency} currency={this.state.currency} />
+        <ButtonToggle isTable={isTable} changeIsTable={this.changeIsTable} />
+        {!isTable ? (
+          <Fragment>
+            <div style={{ width: "80%", margin: "0 auto" }}>
+              <Line
+                data={data}
+                day={data.labels}
+                rate={data.datasets[0].data}
+              />
+            </div>
+
+            <Select onChange={this.changeCurrency} currency={currencyId} />
+            <DateWiget
+              startDate={startDate}
+              endDate={endDate}
+              changeStartDate={this.changeStartDate}
+              changeEndDate={this.changeEndDate}
+              ref={el => (this.wiget = el)}
+            />
+          </Fragment>
+        ) : (
+          <TableCurrency changeCurrency={this.changeCurrency} rate={rate} />
+        )}
       </div>
     );
   }

@@ -1,12 +1,24 @@
 import React from "react";
 
+const styleSelect = {
+  outline: "none",
+  padding: "5px",
+  borderRadius: "3px",
+  marginBottom: "20px"
+};
+
 const Select = props => {
   return (
-    <select style={{ outline: "none" }} onChange={props.onChange}>
-      <option value="USD">USD</option>
-      <option value="EUR">EUR</option>
-      <option value="RUB">RUB</option>
-    </select>
+    <div style={{ marginTop: "20px" }}>
+      <span style={{ fontWeight: "bold", marginRight: "10px" }}>
+        Выберите валюту
+      </span>
+      <select style={styleSelect} onChange={props.onChange}>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="RUB">RUB</option>
+      </select>
+    </div>
   );
 };
 
