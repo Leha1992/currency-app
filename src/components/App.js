@@ -20,6 +20,7 @@ class App extends Component {
       .toISOString()
       .substring(0, 10),
     currencyId: currencyId.USD,
+    currencyAbbreviation: "USD",
     isTable: false
   };
 
@@ -56,22 +57,26 @@ class App extends Component {
   }
 
   changeCurrency = e => {
-    let newCurrency;
+    let newCurrency, newAbbreviation;
     switch (e.target.value) {
       case "USD":
         newCurrency = currencyId.USD;
+        newAbbreviation = "USD";
         break;
       case "EUR":
         newCurrency = currencyId.EUR;
+        newAbbreviation = "EUR";
         break;
       case "RUB":
         newCurrency = currencyId.RUB;
+        newAbbreviation = "RUB";
         break;
       default:
         throw new Error("No such currency");
     }
     this.setState({
-      currencyId: newCurrency
+      currencyId: newCurrency,
+      currencyAbbreviation: newAbbreviation
     });
   };
 
@@ -91,19 +96,20 @@ class App extends Component {
     this.setState(({ startDate, isTable, currencyId }) => {
       return {
         isTable: !isTable,
-        currencyId: !isTable ? currencyId : "145",
-        startDate: !isTable
-          ? startDate
-          : new Date(new Date() - 6 * 86400 * 1000)
-              .toISOString()
-              .substring(0, 10)
+        currencyId: !isTable ? currencyId : "145"
       };
     });
   };
 
   render() {
-    const { startDate, endDate, isTable, currencyId, rate } = this.state;
-    console.log(currencyId);
+    const {
+      startDate,
+      endDate,
+      isTable,
+      currencyId,
+      rate,
+      currencyAbbreviation
+    } = this.state;
     data.labels = this.state.rate.map(item => item.Date.slice(0, 10));
     data.datasets[0].data = this.state.rate.map(item => item.Cur_OfficialRate);
     return (
@@ -129,7 +135,11 @@ class App extends Component {
             />
           </Fragment>
         ) : (
-          <TableCurrency changeCurrency={this.changeCurrency} rate={rate} />
+          <TableCurrency
+            currencyAbbreviation={currencyAbbreviation}
+            changeCurrency={this.changeCurrency}
+            rate={rate}
+          />
         )}
       </div>
     );
