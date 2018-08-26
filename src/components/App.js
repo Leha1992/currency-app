@@ -1,14 +1,17 @@
 import React, { Component, Fragment } from "react";
-import "./App.css";
 import { Line } from "react-chartjs-2";
+import axios from "axios";
 
-import Select from "./Select";
+import SelectСurrency from "./SelectСurrency";
 import DateWiget from "./DateWiget";
-import data from "../dataForLine";
-import api from "../api";
-import currencyId from "../currencyId";
 import ButtonToggle from "./ButtonToggle";
 import TableCurrency from "./TableCurrency";
+import ExportButton from "./ExportButton";
+
+import api from "../api";
+import currencyId from "../currencyId";
+import data from "../dataForLine";
+import currencyAbbreviation from "../currencyAbbreviation";
 
 class App extends Component {
   state = {
@@ -20,7 +23,7 @@ class App extends Component {
       .toISOString()
       .substring(0, 10),
     currencyId: currencyId.USD,
-    currencyAbbreviation: "USD",
+    currencyAbbreviation: currencyAbbreviation.USD,
     isTable: false
   };
 
@@ -57,19 +60,20 @@ class App extends Component {
   }
 
   changeCurrency = e => {
+    const { USD, EUR, RUB } = currencyAbbreviation;
     let newCurrency, newAbbreviation;
     switch (e.target.value) {
-      case "USD":
+      case USD:
         newCurrency = currencyId.USD;
-        newAbbreviation = "USD";
+        newAbbreviation = USD;
         break;
-      case "EUR":
+      case EUR:
         newCurrency = currencyId.EUR;
-        newAbbreviation = "EUR";
+        newAbbreviation = EUR;
         break;
-      case "RUB":
+      case RUB:
         newCurrency = currencyId.RUB;
-        newAbbreviation = "RUB";
+        newAbbreviation = RUB;
         break;
       default:
         throw new Error("No such currency");
@@ -80,7 +84,7 @@ class App extends Component {
     });
   };
 
-  changeStartDate = e => {
+  changeStartDate = () => {
     this.setState({
       startDate: this.wiget.startDate.state.value
     });
@@ -93,12 +97,30 @@ class App extends Component {
   };
 
   changeIsTable = () => {
-    this.setState(({ startDate, isTable, currencyId }) => {
+    this.setState(({ isTable, currencyId }) => {
       return {
         isTable: !isTable,
         currencyId: !isTable ? currencyId : "145"
       };
     });
+  };
+
+  getCSV = () => {
+    let isDownload = window.confirm("Хотите сохранить данные из графика?");
+    if (isDownload) {
+      axios
+        .post("/file/chart", this.state.rate, this.state.currencyAbbreviation)
+        .then(function(response) {
+          const { data } = response;
+          const link = document.createElement("a");
+          link.download = "data.csv";
+          link.href = "data:application/csv," + escape(data);
+          link.click();
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    }
   };
 
   render() {
@@ -113,7 +135,7 @@ class App extends Component {
     data.labels = this.state.rate.map(item => item.Date.slice(0, 10));
     data.datasets[0].data = this.state.rate.map(item => item.Cur_OfficialRate);
     return (
-      <div className="App">
+      <div style={{ textAlign: "center" }} className="App">
         <ButtonToggle isTable={isTable} changeIsTable={this.changeIsTable} />
         {!isTable ? (
           <Fragment>
@@ -125,7 +147,10 @@ class App extends Component {
               />
             </div>
 
-            <Select onChange={this.changeCurrency} currency={currencyId} />
+            <SelectСurrency
+              onChange={this.changeCurrency}
+              currency={currencyId}
+            />
             <DateWiget
               startDate={startDate}
               endDate={endDate}
@@ -133,9 +158,13 @@ class App extends Component {
               changeEndDate={this.changeEndDate}
               ref={el => (this.wiget = el)}
             />
+
+            <ExportButton getCSV={this.getCSV} />
           </Fragment>
         ) : (
           <TableCurrency
+            startDate={startDate}
+            endDate={endDate}
             currencyAbbreviation={currencyAbbreviation}
             changeCurrency={this.changeCurrency}
             rate={rate}

@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
     "chart.js": "^2.7.2",
+    "concurrently": "^4.0.1",
+    "express": "^4.16.3",
+    "json2csv": "^4.2.1",
     "react": "^16.4.2",
     "react-chartjs-2": "^2.7.4",
     "react-day-picker": "^7.1.10",
@@ -11,9 +16,14 @@
     "react-scripts": "1.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently \"yarn run react \" \"nodemon server\"",
+    "react": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "proxy": "http://localhost:5000",
+  "devDependencies": {
+    "nodemon": "^1.18.3"
   }
 }

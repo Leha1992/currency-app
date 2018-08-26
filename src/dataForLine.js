@@ -2,7 +2,7 @@ const data = {
   labels: [],
   datasets: [
     {
-      label: "Currency",
+      label: "График официального курса белорусского рубля",
       fill: true,
       lineTension: 0.1,
       backgroundColor: "rgba(75,192,192,0.4)",

@@ -23,7 +23,7 @@ class DateWiget extends Component {
         }}
       >
         <span style={{ fontWeight: "bold", marginBottom: "20px" }}>
-          Укажите промежуток времени
+          Выберите начальную и конечную дату
         </span>
         <div style={{ marginBottom: "15px" }}>
           <span style={{ fontWeight: "bold", marginRight: "10px" }}>От</span>

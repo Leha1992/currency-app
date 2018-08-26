@@ -4,10 +4,11 @@ const styleSelect = {
   outline: "none",
   padding: "5px",
   borderRadius: "3px",
-  marginBottom: "20px"
+  marginBottom: "20px",
+  cursor: "pointer"
 };
 
-const Select = props => {
+const SelectCurrency = props => {
   return (
     <div style={{ marginTop: "20px" }}>
       <span style={{ fontWeight: "bold", marginRight: "10px" }}>
@@ -22,4 +23,4 @@ const Select = props => {
   );
 };
 
-export default Select;
+export default SelectCurrency;
