@@ -5,11 +5,11 @@ This application is for tracking the exchange rate of the Belarusian ruble in re
 
 ### Getting Started
 
-#####1) git clone https://github.com/Leha1992/currency-app.git
+1) git clone https://github.com/Leha1992/currency-app.git
 
-#####2) yarn install or npm install
+2) yarn install or npm install
 
-#####3) yarn start or npm start
+3) yarn start or npm start
 
 
 
