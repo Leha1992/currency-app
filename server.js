@@ -36,21 +36,15 @@ app.post("/file/table", (req, res) => {
   const { values, dates, columns } = req.body;
   let curAbbreviation = columns.map(elem => elem.name);
   const fields = ["Date", ...curAbbreviation];
-  let data = [];
-  let allValues = [dates];
-
-  for (let i = 0; i < columns.length; i++) {
-    let arr = [];
-    for (let j = 0; j < values.length; j++) {
-      arr.push(values[j][i]);
-    }
-    allValues.push(arr);
+  for (let i = 0; i < dates.length; i++) {
+    values[i].unshift(dates[i]);
   }
-
-  console.log(data);
-  const json2csvParser = new Json2csvParser({ fields });
-  const csv = json2csvParser.parse(data);
-  res.send(allValues);
+  values.unshift(fields);
+  let strCSV = "";
+  values.forEach(value => {
+    strCSV += value.join(",") + "\n";
+  });
+  res.send(strCSV);
 });
 
 app.listen("5000", () => console.log("Server running"));
