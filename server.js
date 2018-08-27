@@ -4,10 +4,7 @@ const Json2csvParser = require("json2csv").Parser;
 
 const app = express();
 
-// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-
-// parse application/json
 app.use(bodyParser.json());
 
 app.post("/file/chart", (req, res) => {

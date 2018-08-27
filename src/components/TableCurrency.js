@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { saveAs } from "file-saver/FileSaver";
 import axios from "axios";
 
 import RadioButton from "./RadioButton";
@@ -107,11 +108,8 @@ class TableCurrency extends Component {
         .post("/file/table", this.state)
         .then(function(response) {
           const { data } = response;
-          console.log(response.data);
-          const link = document.createElement("a");
-          link.download = "data.csv";
-          link.href = "data:application/csv," + escape(data);
-          link.click();
+          var blob = new Blob([data], { type: "text/plain;charset=utf-8" });
+          saveAs(blob, "data.table.csv");
         })
         .catch(function(error) {
           console.log(error);

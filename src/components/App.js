@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { Line } from "react-chartjs-2";
-import axios from "axios";
 import { saveAs } from "file-saver/FileSaver";
+import axios from "axios";
 
 import SelectСurrency from "./SelectСurrency";
 import DateWiget from "./DateWiget";
@@ -113,10 +113,8 @@ class App extends Component {
         .post("/file/chart", this.state.rate, this.state.currencyAbbreviation)
         .then(function(response) {
           const { data } = response;
-          const link = document.createElement("a");
-          link.download = "data.csv";
-          link.href = "data:application/csv," + escape(data);
-          link.click();
+          var blob = new Blob([data], { type: "text/plain;charset=utf-8" });
+          saveAs(blob, "data.chart.csv");
         })
         .catch(function(error) {
           console.log(error);
